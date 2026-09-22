@@ -89,6 +89,12 @@
     .opcion .parte + dl { margin-top: 4px; }
     td small { display: block; font-size: .75rem; color: var(--muted); font-weight: 400; }
     table.izq td, table.izq th { text-align: left; vertical-align: top; }
+    .k-mini { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 8px; }
+    table.rangos { min-width: 0; margin-top: 8px; font-size: .85rem; }
+    table.rangos th, table.rangos td { padding: 6px 6px; text-align: left; }
+    table.rangos td:last-child, table.rangos th:last-child { text-align: right; }
+    table.rangos tr.activo td { background: var(--primary-bg); color: var(--primary); font-weight: 700; }
+    tr.sep td { font-weight: 600; }
     .nota { color: var(--muted); font-size: .85rem; margin-top: 8px; }
     footer { margin-top: 36px; color: var(--muted); font-size: .8rem; }
     footer a { color: var(--primary); }
@@ -153,26 +159,19 @@
     </div>
   </div>
 
-  <h2>Cómo cobra cada uno: parte fija y parte por uso</h2>
-  <p class="nota" style="margin:-4px 0 10px">La <strong>parte fija</strong> es una suscripción: vale lo mismo en todo su rango, se use poco o mucho.
-    La <strong>parte por uso</strong> crece con cada mensaje o contacto. El pago a Meta es siempre por uso y es igual en las tres opciones.</p>
-  <div class="tabla-wrap"><table class="izq">
-    <thead><tr><th>Opción</th><th>Parte fija (suscripción por rangos, pago mensual)</th><th>Parte por uso</th></tr></thead>
-    <tbody>
-      <tr><td>Meta (en las tres)</td><td>No tiene</td><td>Cada mensaje entregado: marketing USD 0,0125 · utilidad y respuestas USD 0,0008 (1.000 respuestas gratis al mes)</td></tr>
-      <tr><td>API de Meta + Chatwoot + n8n</td><td>USD 24 de servidor, igual de 1 a 9.600 contactos</td><td>Ninguna de la plataforma</td></tr>
-      <tr><td>ManyChat</td><td>USD 39 de 1 a 2.500 contactos activos (Pro) · USD 99 de 2.501 a 7.500 (Business) · USD 199 hasta 25.000 (Advanced)</td><td>Solo en Business: USD 0,025 por cada contacto activo por encima de 7.500</td></tr>
-      <tr><td>respond.io</td><td>USD 199 (Growth), incluye hasta 1.000 contactos que responden</td><td>USD 12 por cada 100 contactos que responden por encima de 1.000</td></tr>
-    </tbody>
-  </table></div>
+  <h2>Precio de cada plataforma por rango</h2>
+  <p class="nota" style="margin:-4px 0 10px">El precio de la plataforma no se calcula con una fórmula: se busca en qué rango cae
+    el uso y se toma el valor de ese rango. La fila resaltada es la que aplica a las personas elegidas en el simulador.
+    Lo que se le paga a Meta por los mensajes va <strong>aparte</strong> y es igual en las tres opciones.</p>
+  <div class="grid" id="rangos"></div>
 
   <h2>Costo mensual por opción</h2>
   <div class="grid" id="opciones"></div>
 
   <h2>Los tres escenarios de un vistazo (USD/mes, con los supuestos de arriba)</h2>
   <div class="tabla-wrap"><table id="tabla"></table></div>
-  <p class="nota">Cada celda: total = parte fija + parte por uso (plataforma + Meta). Supuesto conservador: todos los mensajes
-    se entregan. De 9.600 contactos, ~10 % (960) serían nuevos: mismo precio en Meta, pero hay que calentar el número por tandas.</p>
+  <p class="nota">Supuesto conservador: todos los mensajes se entregan. De 9.600 contactos, ~10 % (960) serían nuevos:
+    mismo precio en Meta, pero hay que calentar el número por tandas para no perder calidad.</p>
 
   <footer>
     Fuentes: Meta for Developers (precios y cambio del 1-oct-2026), páginas de precios de ManyChat y respond.io,
@@ -185,42 +184,42 @@
 const META = { marketing: 0.0125, utilidad: 0.0008, servicio: 0.0008, servicioGratis: 1000 };
 const miles = (v) => v.toLocaleString('es-CO');
 
+// Precio de cada plataforma: tabla de rangos tal como la publica el proveedor (pago mensual / anual).
 const OPCIONES = [
   {
     id: 'chatwoot',
     nombre: 'API de Meta + Chatwoot + n8n',
-    plataforma: () => ({ fijo: 24, uso: 0, plan: 'Servidor 4 GB', rango: 'igual de 1 a 9.600 contactos' }),
+    mide: 'contactos',
+    unidad: 'contactos',
+    rangos: [
+      { desde: 1, hasta: 9600, plan: 'Servidor 4 GB', m: 24, a: 24 }
+    ],
     puntos: ['Sin tarifa por contacto ni por usuario', 'Reusa el backend y n8n que ya existen', 'Mantenimiento a cargo del equipo']
   },
   {
     id: 'manychat',
     nombre: 'ManyChat',
-    plataforma: (c) => {
-      const planes = [
-        { plan: 'Pro', base: { m: 39, a: 29 }, desde: 1, tope: 2500, extra: 0.05 },
-        { plan: 'Business', base: { m: 99, a: 69 }, desde: 2501, tope: 7500, extra: 0.025 },
-        { plan: 'Advanced', base: { m: 199, a: 139 }, desde: 7501, tope: 25000, extra: null }
-      ];
-      const posibles = planes.map(p => {
-        const exceso = Math.max(0, c.n - p.tope);
-        if (exceso && p.extra === null) return null;
-        return { fijo: p.base[c.pago], uso: exceso * (p.extra || 0), plan: p.plan,
-          rango: `fijo de ${miles(p.desde)} a ${miles(p.tope)} contactos activos` };
-      }).filter(Boolean);
-      return posibles.reduce((a, b) => (b.fijo + b.uso < a.fijo + a.uso ? b : a));
-    },
-    puntos: ['El bot de identificación ya está armado', 'Cero mantenimiento técnico', 'El plan sube de escalón al pasar 2.500 y 7.500 contactos activos']
+    mide: 'contactos',
+    unidad: 'contactos activos',
+    rangos: [
+      { desde: 1, hasta: 2500, plan: 'Pro', m: 39, a: 29 },
+      { desde: 2501, hasta: 7500, plan: 'Business', m: 99, a: 69 },
+      { desde: 7501, hasta: 25000, plan: 'Advanced', m: 199, a: 139 }
+    ],
+    puntos: ['El bot de identificación ya está armado', 'Cero mantenimiento técnico', 'Cambia de plan al pasar 2.500 y 7.500 contactos activos']
   },
   {
     id: 'respond',
     nombre: 'respond.io',
-    plataforma: (c) => {
-      const activos = Math.round(c.n * c.r / 100);
-      const bloques = Math.ceil(Math.max(0, activos - 1000) / 100);
-      return { fijo: c.pago === 'a' ? 159 : 199, uso: bloques * 12, plan: 'Growth',
-        rango: `incluye 1.000 que responden (hoy ${miles(activos)})` };
-    },
-    puntos: ['La mejor redirección y asignación entre equipos', 'Sin recargo sobre las tarifas de Meta', 'El más caro cuando mucha gente responde']
+    mide: 'responden',
+    unidad: 'contactos que responden',
+    // respond.io Growth incluye 1.000 contactos que responden; cada bloque de 100 adicionales suma USD 12.
+    rangos: [{ desde: 0, hasta: 1000, plan: 'Growth', m: 199, a: 159 }].concat(
+      Array.from({ length: 86 }, (_, i) => ({
+        desde: 1001 + i * 100, hasta: 1100 + i * 100,
+        plan: `Growth + ${miles((i + 1) * 100)} extra`, m: 199 + (i + 1) * 12, a: 159 + (i + 1) * 12
+      }))),
+    puntos: ['La mejor redirección y asignación entre equipos', 'Sin recargo sobre las tarifas de Meta', 'Se cobra por cada contacto que responde']
   }
 ];
 
@@ -245,12 +244,21 @@ function costoMeta(c) {
   return { utilidad, marketing, servicio, total: utilidad + marketing + servicio };
 }
 
+function medida(o, c) {
+  return o.mide === 'responden' ? Math.round(c.n * c.r / 100) : c.n;
+}
+
+function rango(o, c) {
+  const v = medida(o, c);
+  return o.rangos.find(r => v >= r.desde && v <= r.hasta) || o.rangos[o.rangos.length - 1];
+}
+
 function calcular(c) {
   const meta = costoMeta(c);
   return OPCIONES.map(o => {
-    const pl = o.plataforma(c);
-    const uso = pl.uso + meta.total;
-    return { ...o, meta, pl, fijo: pl.fijo, uso, total: pl.fijo + uso };
+    const r = rango(o, c);
+    const plataforma = r[c.pago];
+    return { ...o, meta, r, v: medida(o, c), plataforma, total: plataforma + meta.total };
   });
 }
 
@@ -260,34 +268,54 @@ function pintar() {
   document.querySelectorAll('#escenarios button').forEach(b => b.classList.toggle('on', Number(b.dataset.n) === c.n));
 
   const res = calcular(c);
-  const min = Math.min(...res.map(x => x.total));
+
+  $('rangos').innerHTML = res.map(x => `
+    <div class="card">
+      <h3 style="font-size:1rem">${x.nombre}</h3>
+      <table class="rangos">
+        <thead><tr><th>De ${x.unidad}</th><th>Plan</th><th>Valor/mes</th></tr></thead>
+        <tbody>${x.rangos.filter((r, i) => i < 3 || r === x.r).map(r => `<tr class="${r === x.r ? 'activo' : ''}">
+          <td>${miles(r.desde)} a ${miles(r.hasta)}</td><td>${r.plan}</td><td>${usd(r[c.pago])}</td></tr>`).join('')}</tbody>
+      </table>
+      ${x.id === 'respond' ? '<p class="nota">Después de 1.000: +USD 12 por cada 100 que responden.</p>' : ''}
+      <p class="nota">Hoy: ${miles(x.v)} ${x.unidad} → ${usd(x.plataforma)}</p>
+    </div>`).join('');
+
+  const minPlat = Math.min(...res.map(x => x.plataforma));
   $('opciones').innerHTML = res.map(x => `
-    <div class="card opcion ${x.total === min ? 'mejor' : ''}">
-      ${x.total === min ? '<span class="tag">Más barata</span>' : ''}
+    <div class="card opcion ${x.plataforma === minPlat ? 'mejor' : ''}">
+      ${x.plataforma === minPlat ? '<span class="tag">Más barata</span>' : ''}
       <h3>${x.nombre}</h3>
-      <div class="total">${usd(x.total)}</div>
-      <div class="cop">≈ ${cop(x.total * c.trm)} / mes</div>
-      <div class="parte">Parte fija <span>${usd(x.fijo)}</span></div>
-      <dl><dt>${x.pl.plan} · ${x.pl.rango}</dt><dd>${usd(x.fijo)}</dd></dl>
-      <div class="parte">Parte por uso <span>${usd(x.uso)}</span></div>
+      <div class="k-mini">Precio de la plataforma</div>
+      <div class="total">${usd(x.plataforma)}</div>
+      <div class="cop">Plan ${x.r.plan} · de ${miles(x.r.desde)} a ${miles(x.r.hasta)} ${x.unidad}</div>
+      <div class="parte">Pago a Meta por mensajes (aparte) <span>${usd(x.meta.total)}</span></div>
       <dl>
-        ${x.pl.uso ? `<dt>Plataforma · excedente</dt><dd>${usd(x.pl.uso)}</dd>` : ''}
-        <dt>Meta · marketing</dt><dd>${usd(x.meta.marketing)}</dd>
-        <dt>Meta · utilidad</dt><dd>${usd(x.meta.utilidad)}</dd>
-        <dt>Meta · respuestas</dt><dd>${usd(x.meta.servicio)}</dd>
+        <dt>Marketing</dt><dd>${usd(x.meta.marketing)}</dd>
+        <dt>Utilidad</dt><dd>${usd(x.meta.utilidad)}</dd>
+        <dt>Respuestas</dt><dd>${usd(x.meta.servicio)}</dd>
       </dl>
+      <div class="parte">Total del mes <span>${usd(x.total)}</span></div>
+      <div class="cop">≈ ${cop(x.total * c.trm)}</div>
       <ul>${x.puntos.map(p => `<li>${p}</li>`).join('')}</ul>
     </div>`).join('');
 
   const escenarios = [200, 1500, 9600];
   const filas = escenarios.map(n => calcular(config(n)));
+  const celda = (txt, cls = '') => `<td class="${cls}">${txt}</td>`;
   $('tabla').innerHTML = `
-    <thead><tr><th>Opción</th>${escenarios.map(n => `<th>${miles(n)} personas</th>`).join('')}</tr></thead>
-    <tbody>${OPCIONES.map((o, i) => `<tr><td>${o.nombre}</td>${filas.map(f => {
-      const min = Math.min(...f.map(x => x.total));
-      const x = f[i];
-      return `<td class="${x.total === min ? 'mejor' : ''}">${usd(x.total)}<small>fijo ${usd(x.fijo)} + uso ${usd(x.uso)}</small></td>`;
-    }).join('')}</tr>`).join('')}</tbody>`;
+    <thead><tr><th>Concepto</th>${escenarios.map(n => `<th>${miles(n)} personas</th>`).join('')}</tr></thead>
+    <tbody>
+      ${OPCIONES.map((o, i) => `<tr><td>Plataforma · ${o.nombre}</td>${filas.map(f => {
+        const x = f[i];
+        return celda(`${usd(x.plataforma)}<small>plan ${x.r.plan}</small>`);
+      }).join('')}</tr>`).join('')}
+      <tr><td>Pago a Meta (igual en las tres)</td>${filas.map(f => celda(usd(f[0].meta.total))).join('')}</tr>
+      ${OPCIONES.map((o, i) => `<tr class="sep"><td>Total · ${o.nombre}</td>${filas.map(f => {
+        const min = Math.min(...f.map(x => x.total));
+        return celda(usd(f[i].total), f[i].total === min ? 'mejor' : '');
+      }).join('')}</tr>`).join('')}
+    </tbody>`;
 }
 
 document.querySelectorAll('#escenarios button').forEach(b =>
