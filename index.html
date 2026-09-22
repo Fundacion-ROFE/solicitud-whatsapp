@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Costos Canal WhatsApp — Fundación ROFÉ</title>
+  <link rel="icon" href="img/logo_rofe_aplicacion2.png" type="image/png">
+  <style>
+    :root {
+      --primary:    #406C9E;
+      --primary-bg: rgba(64,108,158,0.10);
+      --green:      #4E7A36;
+      --green-bg:   rgba(110,160,80,0.14);
+      --amber:      #9A6F08;
+      --amber-bg:   rgba(184,134,11,0.12);
+      --bg:         #FFFFFF;
+      --surface:    #FBF6F2;
+      --border:     #EBDDD2;
+      --text:       #1A2535;
+      --muted:      #5E6C84;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --primary: #8DB3E0; --primary-bg: rgba(141,179,224,0.12);
+        --green: #9CCB7E; --green-bg: rgba(156,203,126,0.14);
+        --amber: #E3B64A; --amber-bg: rgba(227,182,74,0.14);
+        --bg: #12161D; --surface: #1B212B; --border: #2C3542;
+        --text: #E7EBF1; --muted: #9AA6B8;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Gilroy', 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;
+      background: var(--bg); color: var(--text);
+      font-size: 15px; line-height: 1.5;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 16px 48px; }
+    header h1 { font-size: 1.6rem; color: var(--primary); }
+    header p { color: var(--muted); margin-top: 4px; }
+    h2 { font-size: 1.1rem; margin: 32px 0 12px; }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .card .k { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .card .v { font-size: 1.5rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .card .s { font-size: .85rem; color: var(--muted); margin-top: 2px; }
+    .aviso {
+      background: var(--amber-bg); border-left: 4px solid var(--amber);
+      border-radius: 6px; padding: 12px 14px; margin-top: 12px; font-size: .92rem;
+    }
+    .escenarios { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .escenarios button {
+      font: inherit; cursor: pointer; padding: 8px 14px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    }
+    .escenarios button.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .controles { display: grid; gap: 12px 20px; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
+    .controles label { display: block; font-size: .85rem; color: var(--muted); }
+    .controles input[type=number], .controles select {
+      width: 100%; font: inherit; margin-top: 4px; padding: 7px 9px;
+      border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text);
+    }
+    .controles input[type=range] { width: 100%; margin-top: 8px; }
+    .opcion { position: relative; }
+    .opcion.mejor { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+    .opcion .tag {
+      position: absolute; top: 10px; right: 12px; font-size: .72rem; font-weight: 700;
+      background: var(--green-bg); color: var(--green); padding: 2px 8px; border-radius: 999px;
+    }
+    .opcion h3 { font-size: 1rem; padding-right: 70px; }
+    .opcion .total { font-size: 1.9rem; font-weight: 700; margin: 6px 0 0; font-variant-numeric: tabular-nums; }
+    .opcion .cop { color: var(--muted); font-size: .9rem; }
+    .opcion dl { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin-top: 10px; font-size: .88rem; }
+    .opcion dt { color: var(--muted); }
+    .opcion dd { text-align: right; font-variant-numeric: tabular-nums; }
+    .opcion ul { margin: 10px 0 0 18px; font-size: .85rem; color: var(--muted); }
+    .tabla-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; min-width: 520px; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: right; font-variant-numeric: tabular-nums; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: var(--muted); font-weight: 600; font-size: .82rem; }
+    td.mejor { color: var(--green); font-weight: 700; }
+    .nota { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+    footer { margin-top: 36px; color: var(--muted); font-size: .8rem; }
+    footer a { color: var(--primary); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Canal WhatsApp — costo estimado por uso</h1>
+    <p>Envío masivo + redirección de contactos (JC, MR, proveedores, empresas). Tarifas verificadas el 22-sep-2026.</p>
+  </header>
+
+  <h2>Lo que cobra Meta en Colombia (por mensaje entregado)</h2>
+  <div class="grid">
+    <div class="card"><div class="k">Marketing</div><div class="v">USD 0,0125</div><div class="s">Invitaciones, convocatorias, oportunidades</div></div>
+    <div class="card"><div class="k">Utilidad</div><div class="v">USD 0,0008</div><div class="s">Recordatorios de clase, avisos del curso</div></div>
+    <div class="card"><div class="k">Respuestas (servicio)</div><div class="v">USD 0,0008</div><div class="s">Primeras 1.000 al mes gratis por número</div></div>
+    <div class="card"><div class="k">Límite diario</div><div class="v">100.000</div><div class="s">Personas/día con la empresa verificada en Meta (hoy: ~150)</div></div>
+  </div>
+  <div class="aviso">
+    <strong>Se cobra por mensaje entregado</strong>, no por conversación ni por contacto. Que el contacto
+    sea nuestro o nuevo <strong>no cambia el precio de Meta</strong>. Lo que cambia es que al contacto nuevo
+    solo se le puede escribir primero con una plantilla aprobada y con su consentimiento, y que en ManyChat
+    cuenta dentro del tope de contactos. Los mensajes no entregados no se cobran.
+    <br><strong>Desde el 1-oct-2026</strong> Meta empieza a cobrar las respuestas (antes eran gratis).
+  </div>
+
+  <h2>Simulador</h2>
+  <div class="escenarios" id="escenarios">
+    <button data-n="200">Uso promedio · 200</button>
+    <button data-n="1500">Uso alto · 1.500</button>
+    <button data-n="9600">Uso máximo · 9.600</button>
+  </div>
+  <div class="controles">
+    <div>
+      <label for="n">Personas alcanzadas en el mes: <strong id="nTxt"></strong></label>
+      <input type="range" id="n" min="50" max="9600" step="50" value="200">
+    </div>
+    <div>
+      <label for="u">Avisos de utilidad por persona/mes
+        <input type="number" id="u" min="0" max="20" step="1" value="2"></label>
+    </div>
+    <div>
+      <label for="m">Mensajes de marketing por persona/mes
+        <input type="number" id="m" min="0" max="10" step="1" value="1"></label>
+    </div>
+    <div>
+      <label for="r">% que responde y conversa
+        <input type="number" id="r" min="0" max="100" step="5" value="30"></label>
+    </div>
+    <div>
+      <label for="s">Respuestas nuestras por conversación
+        <input type="number" id="s" min="0" max="30" step="1" value="4"></label>
+    </div>
+    <div>
+      <label for="pago">Forma de pago de la plataforma
+        <select id="pago"><option value="m">Mensual</option><option value="a">Anual (pago por adelantado)</option></select></label>
+    </div>
+    <div>
+      <label for="trm">Tasa de referencia (COP por USD, ajustable)
+        <input type="number" id="trm" min="1000" max="10000" step="50" value="4000"></label>
+    </div>
+  </div>
+
+  <h2>Costo mensual por opción</h2>
+  <div class="grid" id="opciones"></div>
+
+  <h2>Los tres escenarios de un vistazo (USD/mes, con los supuestos de arriba)</h2>
+  <div class="tabla-wrap"><table id="tabla"></table></div>
+  <p class="nota">Supuesto conservador: todos los mensajes se entregan. De 9.600 contactos, ~10 % (960) serían nuevos:
+    mismo precio en Meta, pero hay que calentar el número por tandas para no perder calidad.</p>
+
+  <footer>
+    Fuentes: Meta for Developers (precios y cambio del 1-oct-2026), páginas de precios de ManyChat y respond.io,
+    requisitos de Chatwoot. Detalle completo en el documento de justificación.
+    · <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing">Precios Meta</a>
+  </footer>
+</div>
+
+<script>
+const META = { marketing: 0.0125, utilidad: 0.0008, servicio: 0.0008, servicioGratis: 1000 };
+
+const OPCIONES = [
+  {
+    id: 'chatwoot',
+    nombre: 'API de Meta + Chatwoot + n8n',
+    plataforma: () => 24,
+    detallePlataforma: 'Servidor propio (4 GB)',
+    puntos: ['Sin tarifa por contacto ni por usuario', 'Reusa el backend y n8n que ya existen', 'Mantenimiento a cargo del equipo']
+  },
+  {
+    id: 'manychat',
+    nombre: 'ManyChat',
+    plataforma: (c) => {
+      const planes = [
+        { base: { m: 39, a: 29 }, tope: 2500, extra: 0.05 },
+        { base: { m: 99, a: 69 }, tope: 7500, extra: 0.025 },
+        { base: { m: 199, a: 139 }, tope: 25000, extra: null }
+      ];
+      return Math.min(...planes.map(p => {
+        const exceso = Math.max(0, c.n - p.tope);
+        if (exceso && p.extra === null) return Infinity;
+        return p.base[c.pago] + exceso * (p.extra || 0);
+      }));
+    },
+    detallePlataforma: 'Plan según contactos activos',
+    puntos: ['El bot de identificación ya está armado', 'Cero mantenimiento técnico', 'Cobra por cada contacto activo del mes']
+  },
+  {
+    id: 'respond',
+    nombre: 'respond.io',
+    plataforma: (c) => {
+      const activos = Math.round(c.n * c.r / 100);
+      return (c.pago === 'a' ? 159 : 199) + Math.ceil(Math.max(0, activos - 1000) / 100) * 12;
+    },
+    detallePlataforma: 'Growth · 1.000 contactos que responden incluidos',
+    puntos: ['La mejor redirección y asignación entre equipos', 'Sin recargo sobre las tarifas de Meta', 'El más caro cuando mucha gente responde']
+  }
+];
+
+const $ = (id) => document.getElementById(id);
+const usd = (v) => 'USD ' + v.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const cop = (v) => 'COP ' + Math.round(v).toLocaleString('es-CO');
+
+function config(n) {
+  return {
+    n: n ?? Number($('n').value),
+    u: Number($('u').value), m: Number($('m').value),
+    r: Number($('r').value), s: Number($('s').value),
+    pago: $('pago').value, trm: Number($('trm').value)
+  };
+}
+
+function costoMeta(c) {
+  const utilidad = c.n * c.u * META.utilidad;
+  const marketing = c.n * c.m * META.marketing;
+  const respuestas = c.n * (c.r / 100) * c.s;
+  const servicio = Math.max(0, respuestas - META.servicioGratis) * META.servicio;
+  return { utilidad, marketing, servicio, total: utilidad + marketing + servicio };
+}
+
+function calcular(c) {
+  const meta = costoMeta(c);
+  return OPCIONES.map(o => {
+    const plataforma = o.plataforma(c);
+    return { ...o, meta, plataformaCosto: plataforma, total: plataforma + meta.total };
+  });
+}
+
+function pintar() {
+  const c = config();
+  $('nTxt').textContent = c.n.toLocaleString('es-CO');
+  document.querySelectorAll('#escenarios button').forEach(b => b.classList.toggle('on', Number(b.dataset.n) === c.n));
+
+  const res = calcular(c);
+  const min = Math.min(...res.map(x => x.total));
+  $('opciones').innerHTML = res.map(x => `
+    <div class="card opcion ${x.total === min ? 'mejor' : ''}">
+      ${x.total === min ? '<span class="tag">Más barata</span>' : ''}
+      <h3>${x.nombre}</h3>
+      <div class="total">${usd(x.total)}</div>
+      <div class="cop">≈ ${cop(x.total * c.trm)} / mes</div>
+      <dl>
+        <dt>Plataforma · ${x.detallePlataforma}</dt><dd>${usd(x.plataformaCosto)}</dd>
+        <dt>Meta · marketing</dt><dd>${usd(x.meta.marketing)}</dd>
+        <dt>Meta · utilidad</dt><dd>${usd(x.meta.utilidad)}</dd>
+        <dt>Meta · respuestas</dt><dd>${usd(x.meta.servicio)}</dd>
+      </dl>
+      <ul>${x.puntos.map(p => `<li>${p}</li>`).join('')}</ul>
+    </div>`).join('');
+
+  const escenarios = [200, 1500, 9600];
+  const filas = escenarios.map(n => calcular(config(n)));
+  $('tabla').innerHTML = `
+    <thead><tr><th>Opción</th>${escenarios.map(n => `<th>${n.toLocaleString('es-CO')} personas</th>`).join('')}</tr></thead>
+    <tbody>${OPCIONES.map((o, i) => `<tr><td>${o.nombre}</td>${filas.map(f => {
+      const min = Math.min(...f.map(x => x.total));
+      return `<td class="${f[i].total === min ? 'mejor' : ''}">${usd(f[i].total)}</td>`;
+    }).join('')}</tr>`).join('')}
+    <tr><td>De eso, pago a Meta</td>${filas.map(f => `<td>${usd(f[0].meta.total)}</td>`).join('')}</tr></tbody>`;
+}
+
+document.querySelectorAll('#escenarios button').forEach(b =>
+  b.addEventListener('click', () => { $('n').value = b.dataset.n; pintar(); }));
+['n', 'u', 'm', 'r', 's', 'pago', 'trm'].forEach(id => $(id).addEventListener('input', pintar));
+pintar();
+</script>
+</body>
+</html>
